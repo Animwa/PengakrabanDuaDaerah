@@ -1,5 +1,4 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbNwY4FKgSV9_-UF54sb7RlWfeGXHUEvEMeLmO8HHDMNEh0jPXAwYGrKGLLeqPO-2rag/exec"; 
-const MAX_TOTAL_QUOTA = 80;
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwipWX6VUysOyPDVozzyXTcvmdg1f-98uCJzeYd-Te7-Ar2RRYiFjpnGtEwjYZOMro0yA/exec"; 
 
 let currentCounts = { total: 0, L: 0, P: 0 };
 let totalChart;
@@ -9,19 +8,18 @@ function initCharts() {
     totalChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Laki-Laki', 'Perempuan', 'Sisa Kuota'],
+            labels: ['Laki-Laki', 'Perempuan'],
             datasets: [{
-                data: [0, 0, MAX_TOTAL_QUOTA],
-                backgroundColor: ['#059669', '#db2777', '#f1f5f9'],
-                borderWidth: 0,
-                circumference: 180,
-                rotation: 270,
+                // Default warna abu-abu [1] jika data masih 0
+                data: [0, 0],
+                backgroundColor: ['#059669', '#db2777'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: '80%',
+            cutout: '75%',
             plugins: { 
                 tooltip: { enabled: true }, 
                 legend: { display: false } 
@@ -40,31 +38,27 @@ async function fetchCurrentCounts() {
         currentCounts.total = (data.total !== undefined) ? data.total : (currentCounts.L + currentCounts.P);
         updateDisplay();
     } catch (error) {
-        console.error("Gagal mengambil data kuota awal:", error);
+        console.error("Gagal mengambil data peserta awal:", error);
     }
 }
 
 function updateDisplay() {
-    const sisa = Math.max(0, MAX_TOTAL_QUOTA - currentCounts.total);
-    
     document.getElementById('totalLabel').innerText = currentCounts.total;
     document.getElementById('maleLabel').innerText = currentCounts.L;
     document.getElementById('femaleLabel').innerText = currentCounts.P;
 
-    totalChart.data.datasets[0].data = [currentCounts.L, currentCounts.P, sisa];
-    totalChart.update();
-    checkQuota();
-}
-
-function checkQuota() {
-    const btn = document.getElementById('submitBtn');
-    if (currentCounts.total >= MAX_TOTAL_QUOTA) {
-        btn.disabled = true;
-        btn.innerText = "Kuota Sudah Penuh (80 Peserta)";
+    // Jika belum ada peserta sama sekali, tampilkan chart kosong berwarna netral
+    if (currentCounts.total === 0) {
+        totalChart.data.labels = ['Belum Ada Peserta'];
+        totalChart.data.datasets[0].data = [1];
+        totalChart.data.datasets[0].backgroundColor = ['#e2e8f0'];
     } else {
-        btn.disabled = false;
-        btn.innerText = "Simpan Hasil Presensi";
+        totalChart.data.labels = ['Laki-Laki', 'Perempuan'];
+        totalChart.data.datasets[0].data = [currentCounts.L, currentCounts.P];
+        totalChart.data.datasets[0].backgroundColor = ['#059669', '#db2777'];
     }
+    
+    totalChart.update();
 }
 
 document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
@@ -85,6 +79,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
     try {
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
+            mode: 'cors',
+            redirect: 'follow',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(data)
         });
@@ -110,17 +106,20 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
             setTimeout(() => {
                 popup.classList.remove('active');
                 document.getElementById('attendanceForm').reset();
-                checkQuota();
+                btn.disabled = false;
+                btn.innerText = "Simpan Hasil Presensi";
             }, 2000);
 
         } else {
             alert(`Gagal: ${result.message}`);
-            checkQuota();
+            btn.disabled = false;
+            btn.innerText = "Simpan Hasil Presensi";
         }
 
     } catch (error) {
         alert("Terjadi kesalahan koneksi ke server.");
-        checkQuota();
+        btn.disabled = false;
+        btn.innerText = "Simpan Hasil Presensi";
     }
 });
 
