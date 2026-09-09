@@ -17,7 +17,7 @@
         <header class="emerald-gradient text-white py-6 sm:py-8 px-4 shadow-md mb-6 sm:mb-8">
             <div class="max-w-5xl mx-auto text-center">
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-1 sm:mb-2">PENDAFTARAN PESERTA PENGAKRABAN</h1>
-                <p class="text-emerald-100 text-xs sm:text-sm opacity-90">KEGIATAN PENGAKRABAN KARANGANYAR BARAT X KARANGANYAR TIMUR 1 (Maksimal 80 Peserta/Daerah)</p>
+                <p class="text-emerald-100 text-xs sm:text-sm opacity-90">KEGIATAN PENGAKRABAN KARANGANYAR BARAT X KARANGANYAR TIMUR 1</p>
             </div>
         </header>
 
@@ -26,7 +26,7 @@
             <!-- Section Pengantar -->
             <section class="mb-6 sm:mb-8 text-center">
                 <p class="text-slate-600 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
-                    Formulir ini digunakan untuk melakukan pendataan peserta. 
+                    Formulir ini digunakan untuk melakukan pendataan peserta kegiatan pengakraban Generus Karanganyar Barat dengan Karanganyar Timur 1 yang akan dilaksakaan pada hari Minggu, 13 September 2026.
                 </p>
             </section>
 
@@ -36,12 +36,17 @@
                 <div class="lg:col-span-5 space-y-4 sm:space-y-6">
                     <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                         <h2 class="text-base sm:text-lg font-bold text-slate-700 mb-2">
-                            📊 Total Kuota Terisi
+                            📊 Total Peserta Terdaftar
                         </h2>
                         
                         <!-- Chart Total -->
                         <div class="chart-container">
                             <canvas id="totalChart"></canvas>
+                        </div>
+
+                        <div class="mt-2">
+                            <span id="totalLabel" class="text-3xl font-bold text-emerald-700">0</span>
+                            <span class="text-slate-400 text-sm font-semibold">Peserta</span>
                         </div>
 
                         <!-- Rincian Gender -->
@@ -56,6 +61,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Info Box -->
+                    <div class="bg-emerald-50 border border-emerald-100 p-3 sm:p-4 rounded-xl">
+                        <p class="text-xs sm:text-sm text-emerald-800 leading-relaxed text-center sm:text-left">
+                            <strong>Informasi:</strong> Data pendaftaran tercatat secara langsung dan otomatis ke dalam sistem.
+                        </p>
+                    </div>
+                </div>
 
                 <!-- Form Pendaftaran -->
                 <div class="lg:col-span-7">
