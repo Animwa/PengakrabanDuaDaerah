@@ -6,12 +6,12 @@ const REGISTRATION_DEADLINE = new Date("2026-09-11T23:59:59+07:00");
 let currentCounts = { total: 0, L: 0, P: 0 };
 let totalChart;
 
-// Cek apakah waktu saat ini sudah melewati batas waktu penutupan
+// Cek apakah waktu saat ini sudah melewati batas penutupan
 function isRegistrationClosed() {
     return new Date() > REGISTRATION_DEADLINE;
 }
 
-// Kunci input dan tombol form jika waktu sudah habis
+// Kunci formulir dan tampilkan banner jika waktu pendaftaran sudah lewat
 function checkDeadline() {
     if (isRegistrationClosed()) {
         const banner = document.getElementById('closedBanner');
@@ -30,6 +30,7 @@ function checkDeadline() {
     return false;
 }
 
+// Inisialisasi Donut Chart
 function initCharts() {
     const ctx = document.getElementById('totalChart').getContext('2d');
     totalChart = new Chart(ctx, {
@@ -61,8 +62,10 @@ function initCharts() {
     });
 }
 
+// Ambil data statistik dari Google Apps Script (doGet)
 async function fetchCurrentCounts() {
-    if (!SCRIPT_URL || SCRIPT_URL === "URL_GOOGLE_APPS_SCRIPT_ANDA") return;
+    if (!SCRIPT_URL || SCRIPT_URL.includes("URL_GOOGLE_APPS_SCRIPT_ANDA")) return;
+    
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getCounts`);
         const data = await response.json();
@@ -79,10 +82,11 @@ async function fetchCurrentCounts() {
         
         updateDisplay();
     } catch (error) {
-        console.error("Gagal mengambil data peserta awal:", error);
+        console.error("Gagal mengambil data peserta:", error);
     }
 }
 
+// Update angka label dan donut chart
 function updateDisplay() {
     document.getElementById('totalLabel').innerText = currentCounts.total;
     document.getElementById('maleLabel').innerText = currentCounts.L;
@@ -101,10 +105,27 @@ function updateDisplay() {
     totalChart.update();
 }
 
+// Fungsi reset form dan pulihkan tombol submit
+function resetFormState() {
+    const form = document.getElementById('attendanceForm');
+    form.reset();
+    
+    // Pastikan nilai default armada tetap terpilih
+    const armadaSelect = document.getElementById('armada');
+    if (armadaSelect) armadaSelect.value = "Bersepeda Motor";
+
+    const btn = document.getElementById('submitBtn');
+    if (!checkDeadline()) {
+        btn.disabled = false;
+        btn.innerText = "Simpan Hasil Presensi";
+    }
+}
+
+// Event Submit Formulir
 document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Validasi penutupan saat pengguna menekan tombol simpan
+    // Validasi penutupan sebelum pengiriman data
     if (checkDeadline()) {
         alert("Maaf, waktu pendaftaran telah berakhir.");
         return;
@@ -120,7 +141,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
     };
 
     btn.disabled = true;
-    btn.innerText = "Mengirim...";
+    btn.innerText = "Menyimpan Data...";
 
     try {
         const response = await fetch(SCRIPT_URL, {
@@ -134,11 +155,13 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
         const result = await response.json();
 
         if (result.status === "success") {
+            // Perbarui data lokal
             currentCounts.L = result.counts.L;
             currentCounts.P = result.counts.P;
             currentCounts.total = result.total || (result.counts.L + result.counts.P);
             updateDisplay();
             
+            // Tampilkan rincian data ke dalam modal
             document.getElementById('popupTitle').innerText = result.isUpdate ? "Sukses Diperbarui" : "Sukses Disimpan";
             document.getElementById('resName').innerText = data.name;
             document.getElementById('resDesa').innerText = data.desa;
@@ -146,17 +169,12 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
             document.getElementById('resGender').innerText = data.gender === 'L' ? 'Laki-Laki' : 'Perempuan';
             document.getElementById('resArmada').innerText = data.armada;
 
+            // Buka modal sukses
             const popup = document.getElementById('successPopup');
             popup.classList.add('active');
             
-            setTimeout(() => {
-                popup.classList.remove('active');
-                document.getElementById('attendanceForm').reset();
-                if (!checkDeadline()) {
-                    btn.disabled = false;
-                    btn.innerText = "Simpan Hasil Presensi";
-                }
-            }, 2500);
+            // Reset isian form tanpa langsung menutup popup agar user sempat klik link grup WhatsApp
+            resetFormState();
 
         } else {
             alert(`Gagal: ${result.message}`);
@@ -167,7 +185,8 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
         }
 
     } catch (error) {
-        alert("Terjadi kesalahan koneksi ke server.");
+        console.error(error);
+        alert("Terjadi kesalahan koneksi ke server. Silakan coba kembali.");
         if (!checkDeadline()) {
             btn.disabled = false;
             btn.innerText = "Simpan Hasil Presensi";
@@ -175,19 +194,14 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
     }
 });
 
-// Tutup popup manual jika latar belakang diklik
+// Tutup popup saat latar belakang (backdrop) modal diklik
 document.getElementById('successPopup').addEventListener('click', (e) => {
     if (e.target.id === 'successPopup') {
         e.currentTarget.classList.remove('active');
-        document.getElementById('attendanceForm').reset();
-        if (!checkDeadline()) {
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = false;
-            btn.innerText = "Simpan Hasil Presensi";
-        }
     }
 });
 
+// Jalankan fungsi saat browser selesai memuat halaman
 window.onload = () => {
     initCharts();
     updateDisplay();
