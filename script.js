@@ -1,18 +1,44 @@
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwipWX6VUysOyPDVozzyXTcvmdg1f-98uCJzeYd-Te7-Ar2RRYiFjpnGtEwjYZOMro0yA/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzHN0sOhIZSqP4LxU4Uk9YkddhOMZ36cSf0OK7BliT8yKFI5l6-SLvmxE7-jthL3i1vg/exec"; 
+
+// Batas waktu pendaftaran: Jumat, 11 September 2026 pukul 23:59:59 WIB (+07:00)
+const REGISTRATION_DEADLINE = new Date("2026-09-11T23:59:59+07:00");
 
 let currentCounts = { total: 0, L: 0, P: 0 };
 let totalChart;
+
+// Cek apakah waktu saat ini sudah melewati batas waktu penutupan
+function isRegistrationClosed() {
+    return new Date() > REGISTRATION_DEADLINE;
+}
+
+// Kunci input dan tombol form jika waktu sudah habis
+function checkDeadline() {
+    if (isRegistrationClosed()) {
+        const banner = document.getElementById('closedBanner');
+        if (banner) banner.classList.remove('hidden');
+
+        const btn = document.getElementById('submitBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "Pendaftaran Sudah Ditutup";
+        }
+
+        const formElements = document.querySelectorAll('#attendanceForm input, #attendanceForm select');
+        formElements.forEach(el => el.disabled = true);
+        return true;
+    }
+    return false;
+}
 
 function initCharts() {
     const ctx = document.getElementById('totalChart').getContext('2d');
     totalChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Laki-Laki', 'Perempuan'],
+            labels: ['Belum Ada Peserta'],
             datasets: [{
-                // Default warna abu-abu [1] jika data masih 0
-                data: [0, 0],
-                backgroundColor: ['#059669', '#db2777'],
+                data: [1],
+                backgroundColor: ['#e2e8f0'],
                 borderWidth: 0
             }]
         },
@@ -21,7 +47,14 @@ function initCharts() {
             maintainAspectRatio: false,
             cutout: '75%',
             plugins: { 
-                tooltip: { enabled: true }, 
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            if (currentCounts.total === 0) return ' Belum ada pendaftar';
+                            return ` ${context.label}: ${context.raw} orang`;
+                        }
+                    }
+                }, 
                 legend: { display: false } 
             }
         }
@@ -33,9 +66,17 @@ async function fetchCurrentCounts() {
     try {
         const response = await fetch(`${SCRIPT_URL}?action=getCounts`);
         const data = await response.json();
-        currentCounts.L = data.L || 0;
-        currentCounts.P = data.P || 0;
-        currentCounts.total = (data.total !== undefined) ? data.total : (currentCounts.L + currentCounts.P);
+        
+        if (data.counts) {
+            currentCounts.L = data.counts.L || 0;
+            currentCounts.P = data.counts.P || 0;
+            currentCounts.total = (data.total !== undefined) ? data.total : (currentCounts.L + currentCounts.P);
+        } else {
+            currentCounts.L = data.L || 0;
+            currentCounts.P = data.P || 0;
+            currentCounts.total = (data.total !== undefined) ? data.total : (currentCounts.L + currentCounts.P);
+        }
+        
         updateDisplay();
     } catch (error) {
         console.error("Gagal mengambil data peserta awal:", error);
@@ -47,7 +88,6 @@ function updateDisplay() {
     document.getElementById('maleLabel').innerText = currentCounts.L;
     document.getElementById('femaleLabel').innerText = currentCounts.P;
 
-    // Jika belum ada peserta sama sekali, tampilkan chart kosong berwarna netral
     if (currentCounts.total === 0) {
         totalChart.data.labels = ['Belum Ada Peserta'];
         totalChart.data.datasets[0].data = [1];
@@ -63,12 +103,18 @@ function updateDisplay() {
 
 document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Validasi penutupan saat pengguna menekan tombol simpan
+    if (checkDeadline()) {
+        alert("Maaf, waktu pendaftaran telah berakhir.");
+        return;
+    }
     
     const btn = document.getElementById('submitBtn');
     const data = {
-        name: document.getElementById('name').value,
-        desa: document.getElementById('desa').value,
-        kelompok: document.getElementById('kelompok').value,
+        name: document.getElementById('name').value.trim(),
+        desa: document.getElementById('desa').value.trim(),
+        kelompok: document.getElementById('kelompok').value.trim(),
         gender: document.getElementById('gender').value,
         armada: document.getElementById('armada').value
     };
@@ -106,20 +152,39 @@ document.getElementById('attendanceForm').addEventListener('submit', async (e) =
             setTimeout(() => {
                 popup.classList.remove('active');
                 document.getElementById('attendanceForm').reset();
-                btn.disabled = false;
-                btn.innerText = "Simpan Hasil Presensi";
-            }, 2000);
+                if (!checkDeadline()) {
+                    btn.disabled = false;
+                    btn.innerText = "Simpan Hasil Presensi";
+                }
+            }, 2500);
 
         } else {
             alert(`Gagal: ${result.message}`);
-            btn.disabled = false;
-            btn.innerText = "Simpan Hasil Presensi";
+            if (!checkDeadline()) {
+                btn.disabled = false;
+                btn.innerText = "Simpan Hasil Presensi";
+            }
         }
 
     } catch (error) {
         alert("Terjadi kesalahan koneksi ke server.");
-        btn.disabled = false;
-        btn.innerText = "Simpan Hasil Presensi";
+        if (!checkDeadline()) {
+            btn.disabled = false;
+            btn.innerText = "Simpan Hasil Presensi";
+        }
+    }
+});
+
+// Tutup popup manual jika latar belakang diklik
+document.getElementById('successPopup').addEventListener('click', (e) => {
+    if (e.target.id === 'successPopup') {
+        e.currentTarget.classList.remove('active');
+        document.getElementById('attendanceForm').reset();
+        if (!checkDeadline()) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerText = "Simpan Hasil Presensi";
+        }
     }
 });
 
@@ -127,4 +192,5 @@ window.onload = () => {
     initCharts();
     updateDisplay();
     fetchCurrentCounts();
+    checkDeadline();
 };
