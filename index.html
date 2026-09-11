@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengakraban</title>
+    <title>Pengakraban Generus Karanganyar</title>
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,7 +17,7 @@
         <header class="emerald-gradient text-white py-6 sm:py-8 px-4 shadow-md mb-6 sm:mb-8">
             <div class="max-w-5xl mx-auto text-center">
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight mb-1 sm:mb-2">PENDAFTARAN PESERTA PENGAKRABAN</h1>
-                <p class="text-emerald-100 text-xs sm:text-sm opacity-90">KEGIATAN PENGAKRABAN KARANGANYAR BARAT X KARANGANYAR TIMUR 1</p>
+                <p class="text-emerald-100 text-xs sm:text-sm opacity-90 font-medium">KEGIATAN PENGAKRABAN KARANGANYAR BARAT X KARANGANYAR TIMUR 1</p>
             </div>
         </header>
 
@@ -26,7 +26,7 @@
             <!-- Section Pengantar -->
             <section class="mb-6 sm:mb-8 text-center">
                 <p class="text-slate-600 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
-                    Formulir ini digunakan untuk melakukan pendataan peserta kegiatan pengakraban Generus Karanganyar Barat dengan Karanganyar Timur 1 yang akan dilaksakaan pada hari Minggu, 13 September 2026.
+                    Formulir ini digunakan untuk melakukan pendataan peserta kegiatan pengakraban Generus Karanganyar Barat dengan Karanganyar Timur 1 yang akan dilaksanakan pada hari <strong>Minggu, 13 September 2026</strong>.
                 </p>
             </section>
 
@@ -52,21 +52,24 @@
                         <!-- Rincian Gender -->
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
                             <div class="bg-emerald-50/60 p-2.5 rounded-xl">
-                                <p class="text-[11px] font-semibold text-emerald-800 uppercase">Laki-Laki</p>
+                                <p class="text-[11px] font-semibold text-emerald-800 uppercase tracking-wide">Laki-Laki</p>
                                 <p id="maleLabel" class="text-lg font-bold text-emerald-700">0</p>
                             </div>
                             <div class="bg-pink-50/60 p-2.5 rounded-xl">
-                                <p class="text-[11px] font-semibold text-pink-800 uppercase">Perempuan</p>
+                                <p class="text-[11px] font-semibold text-pink-800 uppercase tracking-wide">Perempuan</p>
                                 <p id="femaleLabel" class="text-lg font-bold text-pink-700">0</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Info Box -->
-                    <div class="bg-emerald-50 border border-emerald-100 p-3 sm:p-4 rounded-xl">
-                        <p class="text-xs sm:text-sm text-emerald-800 leading-relaxed text-center sm:text-left">
-                            <strong>Informasi:</strong> Data pendaftaran tercatat secara langsung dan otomatis ke dalam sistem.
-                        </p>
+                    <div class="bg-emerald-50 border border-emerald-100 p-3.5 sm:p-4 rounded-xl space-y-2">
+                        <div class="flex items-start gap-2.5">
+                            <span class="text-emerald-700 font-bold text-sm">ℹ️</span>
+                            <p class="text-xs sm:text-sm text-emerald-800 leading-relaxed">
+                                <strong>Batas Waktu:</strong> Pendaftaran dibuka sampai hari <strong>Jumat pukul 23:59 WIB</strong>. Sistem akan menutup pendaftaran secara otomatis setelah waktu tersebut.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -75,23 +78,28 @@
                     <div class="bg-white p-5 sm:p-8 rounded-2xl shadow-md border border-slate-100">
                         <h2 class="text-lg sm:text-xl font-bold text-slate-800 mb-4 sm:mb-6 text-center sm:text-left">Lengkapi Data Diri</h2>
                         
+                        <!-- Banner Notifikasi Jika Sudah Lewat Batas Waktu (Disembunyikan secara default) -->
+                        <div id="closedBanner" class="hidden mb-5 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm text-center font-medium">
+                            ⏳ Mohon maaf, masa pendaftaran telah resmi ditutup karena sudah melewati batas waktu hari Jumat.
+                        </div>
+
                         <form id="attendanceForm" class="space-y-4 sm:space-y-5">
                             <div>
                                 <label class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700">Nama Lengkap</label>
                                 <input type="text" id="name" placeholder="Masukkan nama sesuai KTP" required 
-                                    class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+                                    class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400">
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div>
                                     <label class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700">Desa</label>
                                     <input type="text" id="desa" placeholder="Nama Desa" required 
-                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400">
                                 </div>
                                 <div>
                                     <label class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700">Kelompok</label>
                                     <input type="text" id="kelompok" placeholder="Nama Kelompok" required 
-                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all">
+                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400">
                                 </div>
                             </div>
 
@@ -99,7 +107,7 @@
                                 <div>
                                     <label class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700">Jenis Kelamin</label>
                                     <select id="gender" required
-                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white transition-all">
+                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white transition-all disabled:bg-slate-100 disabled:text-slate-400">
                                         <option value="">Pilih Gender</option>
                                         <option value="L">Laki-Laki</option>
                                         <option value="P">Perempuan</option>
@@ -108,15 +116,15 @@
                                 <div>
                                     <label class="block text-xs sm:text-sm font-semibold mb-1 text-slate-700">Pilihan Armada</label>
                                     <select id="armada" required
-                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white transition-all">
-                                        <option value="Bersepeda Motor">Bersepeda Motor</option>
+                                        class="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white transition-all cursor-default disabled:bg-slate-100 disabled:text-slate-400">
+                                        <option value="Bersepeda Motor" selected>Bersepeda Motor</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="pt-2 sm:pt-4">
                                 <button type="submit" id="submitBtn" 
-                                    class="w-full emerald-gradient text-white font-bold py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                                    class="w-full emerald-gradient text-white font-bold py-3.5 sm:py-4 text-sm sm:text-base rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                     Simpan Hasil Presensi
                                 </button>
                             </div>
@@ -127,7 +135,7 @@
         </main>
     </div>
 
-    <!-- Success Popup -->
+    <!-- Success Popup Modal -->
     <div id="successPopup" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-5 sm:p-6 max-w-xs sm:max-w-sm w-full text-center shadow-2xl transition-all">
             <div class="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
